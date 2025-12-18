@@ -1,0 +1,30 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 18
+VisualStudioVersion = 18.3.11218.70
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataAccess", "DataAccess\DataAccess.csproj", "{FFA95420-64C3-4477-8089-1C7D32CEAF48}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WpfApp", "WpfApp\WpfApp.csproj", "{A7DE954D-8B53-4095-B81A-9728F785900F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FFA95420-64C3-4477-8089-1C7D32CEAF48}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FFA95420-64C3-4477-8089-1C7D32CEAF48}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FFA95420-64C3-4477-8089-1C7D32CEAF48}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FFA95420-64C3-4477-8089-1C7D32CEAF48}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A7DE954D-8B53-4095-B81A-9728F785900F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A7DE954D-8B53-4095-B81A-9728F785900F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A7DE954D-8B53-4095-B81A-9728F785900F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A7DE954D-8B53-4095-B81A-9728F785900F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C31779FD-3ED3-4275-801C-61FFFDA7B54A}
+	EndGlobalSection
+EndGlobal
