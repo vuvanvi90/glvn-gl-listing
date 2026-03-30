@@ -60,11 +60,11 @@ namespace DataAccess
                        LedgerAcc.UserLastModified, CONVERT(NVARCHAR(20), 
                        LedgerAcc.DateLastModified, 120) AS DateLastModified 
                 FROM   LedgerAcc 
-                       LEFT JOIN AccountCode ON (LedgerAcc.AccountCode = AccountCode.Code) AND (AccountCode.Company = @BaseCompanyCode) 
+                       LEFT JOIN AccountCode ON (LedgerAcc.AccountCode = AccountCode.Code AND AccountCode.Company = @BaseCompanyCode) 
                        LEFT JOIN JnlAllocation4 ON (LedgerAcc.Allocation4 = JnlAllocation4.Code AND JnlAllocation4.Company = @BaseCompanyCode) 
                        LEFT JOIN JnlAllocation5 ON (LedgerAcc.Allocation5 = JnlAllocation5.Code AND JnlAllocation5.Company = @BaseCompanyCode) 
-                       LEFT JOIN JournalChildAp ON (LedgerAcc.MatchingNo=JournalChildAP.MatchingNo) AND (LedgerAcc.JournalNumber=JournalChildAP.JournalNumber) 
-                       LEFT JOIN Common..supplier Supp on (JournalChildAP.AccountCode = Supp.Code) AND (Supp.Company = JournalChildAP.Company)
+                       LEFT JOIN JournalChildAp ON (LedgerAcc.MatchingNo=JournalChildAP.MatchingNo AND LedgerAcc.JournalNumber = JournalChildAP.JournalNumber AND JournalChildAP.Company = @BaseCompanyCode) 
+                       LEFT JOIN Common..supplier Supp on (JournalChildAP.AccountCode = Supp.Code AND Supp.Company = JournalChildAP.Company)
             ";
 
             // 3. Xây dựng mệnh đề WHERE (Đã sửa logic CompanyCode)
