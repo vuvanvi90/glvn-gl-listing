@@ -54,14 +54,17 @@ namespace WpfApp
             try
             {
                 var accessService = _host.Services.GetRequiredService<IAppAccessService>();
-                bool hasAccess = await accessService.CheckAccessAsync();
+                var accessResult = await accessService.CheckAccessAsync();
 
-                if (!hasAccess)
+                if (!accessResult.IsActive)
                 {
                     MessageBox.Show("Không thể kết nối WIZ, Vui lòng liên hệ Vị Vũ DDU để yêu cầu hỗ trợ.", "Access Denied", MessageBoxButton.OK, MessageBoxImage.Stop);
                     Shutdown(); // Tắt app
                     return;
                 }
+
+                DataAccess.ApplicationConfiguration.CompanyCode = accessResult.CompanyCode;
+                DataAccess.ApplicationConfiguration.CompanyCodes = accessResult.CompanyCodes;
 
                 // Gọi lại logic kiểm tra kết nối
                 // Đảm bảo bạn đã reference namespace chứa ApplicationConfiguration
