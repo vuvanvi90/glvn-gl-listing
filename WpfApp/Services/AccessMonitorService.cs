@@ -24,10 +24,10 @@ namespace WpfApp.Services
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                bool hasAccess = await _accessService.CheckAccessAsync();
+                var accessResult = await _accessService.CheckAccessAsync();
 
-                if (!hasAccess)
-                {
+                if (!accessResult.IsActive)
+                    {
                     _failureCount++; // Tăng biến đếm nếu không có quyền hoặc rớt mạng
 
                     if (_failureCount >= MaxFailures)

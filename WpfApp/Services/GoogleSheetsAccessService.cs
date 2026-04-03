@@ -1,7 +1,7 @@
 ﻿using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
-using Google.Apis.Sheets.v4.Data; // Cần thêm dòng này cho ValueRange
+using Google.Apis.Sheets.v4.Data;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -12,23 +12,23 @@ namespace WpfApp.Services
     public class GoogleSheetsAccessService : IAppAccessService
     {
         private const string SpreadsheetId = "1YYtNBKBEk5GSubUsvxaQI9tIY_c2B3ivblkdjdhRDPY";
-        private const string Range = "Sheet1!A:E";
+        private const string Range = "Sheet1!A:G";
 
-        public async Task<bool> CheckAccessAsync()
+        public async Task<AppAccessResult> CheckAccessAsync()
         {
+            var result = new AppAccessResult { IsActive = false, CompanyCode = "", CompanyCodes = "" };
+
             try
             {
                 string machineId = GetMachineID();
-                string credentialPath = "credentials.json";
-
-                if (!File.Exists(credentialPath))
-                    return false;
+                string resourceName = "WpfApp.credentials.json"; // Tên file nhúng từ bước bảo mật trước
+                var assembly = System.Reflection.Assembly.GetExecutingAssembly();
 
                 GoogleCredential credential;
-                using (var stream = new FileStream(credentialPath, FileMode.Open, FileAccess.Read))
+                using (Stream stream = assembly.GetManifestResourceStream(resourceName))
                 {
-                    credential = GoogleCredential.FromStream(stream)
-                        .CreateScoped(SheetsService.Scope.Spreadsheets);
+                    if (stream == null) return result;
+                    credential = GoogleCredential.FromStream(stream).CreateScoped(SheetsService.Scope.Spreadsheets);
                 }
 
                 var service = new SheetsService(new BaseClientService.Initializer()
@@ -45,27 +45,32 @@ namespace WpfApp.Services
                 {
                     foreach (var row in values)
                     {
-                        // Kiểm tra nếu tìm thấy MachineID (Cột A - index 0)
-                        // Cột Status bây giờ là Cột D (index 3)
                         if (row.Count >= 4 && row[0].ToString() == machineId)
                         {
-                            return row[3].ToString().ToUpper() == "TRUE";
+                            result.IsActive = row[3].ToString().ToUpper() == "TRUE"; // Cột D
+
+                            // Lấy CompanyCode (Cột F - Index 5)
+                            if (row.Count > 5) result.CompanyCode = row[5].ToString();
+
+                            // Lấy CompanyCodes (Cột G - Index 6)
+                            if (row.Count > 6) result.CompanyCodes = row[6].ToString();
+
+                            return result;
                         }
                     }
                 }
 
-                // NẾU CHƯA CÓ TRONG DANH SÁCH -> GỌI HÀM THÊM MỚI
-                // Mặc định ở đây mình đang để trạng thái thêm mới là TRUE (cho phép vào ngay)
+                // Nếu là máy mới, thêm vào với cấu hình mặc định
                 await AddNewMachineToSheetAsync(service, machineId);
 
-                // Trả về true để người dùng mới có thể vào app luôn lần đầu
-                // Nếu bạn muốn phải duyệt tay trên Sheets mới được vào, hãy đổi thành `return false;`
-                return true;
+                result.IsActive = true;
+                result.CompanyCode = "SGTT"; // Mặc định cho máy mới
+                result.CompanyCodes = "'SGTT'";
+                return result;
             }
             catch
             {
-                // Lỗi mạng hoặc lỗi API -> Khóa
-                return false;
+                return result;
             }
         }
 
@@ -73,31 +78,25 @@ namespace WpfApp.Services
         {
             try
             {
-                // Chuẩn bị dữ liệu cho 1 dòng mới
                 var oblist = new List<object>()
                 {
-                    machineId,                                     // Cột A: Machine ID
-                    Environment.MachineName,                       // Cột B: Tên máy tính
-                    Environment.UserName,                          // Cột C: Tài khoản Windows đang login
-                    "TRUE",                                        // Cột D: Status (TRUE = Cho phép, FALSE = Khóa)
-                    DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")   // Cột E: Thời gian ghi nhận
+                    machineId,
+                    Environment.MachineName,
+                    Environment.UserName,
+                    "TRUE",
+                    DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                    "SGTT",                                        // Giá trị mặc định cho cột F
+                    "'SGTT','DANXUAN','GPHSCJSC','TLREC','TRUONGTIN','GLBDCL','VLILC','GLNVI','PHUCDAT'" // Mặc định cột G
                 };
 
-                var valueRange = new ValueRange();
-                valueRange.Values = new List<IList<object>> { oblist };
-
-                // Tạo request Append để thêm vào dòng trống tiếp theo của file Sheets
+                var valueRange = new ValueRange() { Values = new List<IList<object>> { oblist } };
                 var appendRequest = service.Spreadsheets.Values.Append(valueRange, SpreadsheetId, Range);
-
-                // Chế độ USERENTERED giúp Google Sheets tự động format ngày tháng, chữ nghĩa cho đẹp
                 appendRequest.ValueInputOption = SpreadsheetsResource.ValuesResource.AppendRequest.ValueInputOptionEnum.USERENTERED;
-
                 await appendRequest.ExecuteAsync();
             }
             catch (Exception ex)
             {
-                // Bỏ qua lỗi ghi (để không làm sập app), có thể log lại nếu cần
-                System.Diagnostics.Debug.WriteLine($"Lỗi khi ghi máy mới: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine(ex.Message);
             }
         }
 

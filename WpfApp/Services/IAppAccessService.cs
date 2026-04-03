@@ -8,6 +8,6 @@ namespace WpfApp.Services
 {
     public interface IAppAccessService
     {
-        Task<bool> CheckAccessAsync();
+        Task<AppAccessResult> CheckAccessAsync();
     }
 }
